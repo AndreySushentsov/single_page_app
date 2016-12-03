@@ -83,19 +83,21 @@ spa.shell = (function (){
 							delete anchor_map_revise[key_name_dep];
 							delete anchor_map_revise['_s' + key_name_dep];
 						};
-
-						// начало попытки обновления URI; в случае ошибки восстановить исходное значение
-						try{
-							$.uriAnchor.setAnchor(anchor_map_revise);
-						}
-						catch (error){
-							//восстановить исходное состояние в URI
-							$.uriAnchor.setAnchor(stateMap.anchor_map, null, true);
-							bool_return = false;
-						}
 					}
+				}		
+
+				// начало попытки обновления URI; в случае ошибки восстановить исходное значение
+				try{
+					$.uriAnchor.setAnchor(anchor_map_revise);
 				}
-		}
+				catch (error){
+					//восстановить исходное состояние в URI
+					$.uriAnchor.setAnchor(stateMap.anchor_map, null, true);
+					bool_return = false;
+				}
+			return bool_return;	
+		};
+
 			// Метод setJqueryMap
 		setJqueryMap = function () {
 			var $container = stateMap.$container;
@@ -104,6 +106,7 @@ spa.shell = (function (){
 				$chat : $container.find('.spa-shell-chat')
 			};
 		};
+
 			// Метод toggleChat
 			// Назначение: свернуть/развернуть окно чата
 			// Аргументы: 
@@ -166,6 +169,8 @@ spa.shell = (function (){
 			return false;
 		}
 
+			// Обработчик события onHashchange
+			// 
 	// Открытые методы
 			// Метод initModule
 		initModule = function ($container) {
