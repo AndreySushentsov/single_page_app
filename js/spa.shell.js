@@ -239,6 +239,10 @@ spa.shell = (function (){
 				schema_map : configMap.uri_schema_map
 			});
 
+			// настраиваем функциональные модули
+			spa.chat.configModule({});
+			spa.chat.initModule(jqueryMap.$chat);
+
 			// обрабатываем соытия изменения якоря 
 			$(window)
 				.bind('hashchange', onHashchange)
