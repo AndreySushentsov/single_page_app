@@ -160,17 +160,67 @@ spa.shell = (function (){
 				return true;
 		};
 	// Обработчики событий
-		onClickChat = function (event) {
-			if(toggleChat(stateMap.is_chat_retracted)){
-				$.uriAnchor.setAnchor({
-					chat:(stateMap.is_chat_retracted ? 'open' : 'closed')
-				});
+
+			// Обработчик события onHashchange
+			// Назаначение: обрабатывает событие hashchange
+			// Аркументы: 
+			//		event - обьект события jQuery
+			// Параметры: нет
+			// Возвращает: false
+			// Действие: 
+			// 		разбирает якорь в URI
+			//		сравнивает предложенное состояние приложения с текущим
+			//		вносит изменения только если предложенное состояние отличается от текущего
+
+		onHashchange = function (event) {
+			var 
+				anchor_map_previous = copyAnchorMap(),
+				anchor_map_porposed,
+				_s_chat_previous, _s_chat_porposed,
+				s_chat_porposed;
+
+				// пытаемся разобрать якорь
+			try{
+				anchor_map_porposed =$.uriAnchor.makeAnchorMap(); 
+			}
+			catch(error){
+				$.uriAnchor.setAnchor(anchor_map_previous, null, true);
+				return false;	
+			}
+			stateMap.anchor_map = anchor_map_porposed;
+
+				// вспомагательные переменные
+			_s_chat_previous = anchor_map_previous._s_chat;
+			_s_chat_porposed = anchor_map_porposed._s_chat;
+
+				// 	измененме компонента Chat
+			if (! anchor_map_previous || _s_chat_previous !== _s_chat_porposed) {
+				s_chat_porposed = anchor_map_porposed.chat;
+				switch (s_chat_porposed){
+					case 'open':
+						toggleChat(true);
+					break;
+					case 'closed':
+						toggleChat(false);
+					break;
+					default:
+						toggleChat(false);
+						delete anchor_map_porposed.chat;
+						$.uriAnchor.setAnchor( anchor_map_porposed, null, true);
+				}
 			};
+
+			return false;
+		};
+
+			// Обработчик событий onClickChat
+		onClickChat = function (event) {
+			changeAnchorPart({
+				chat: (stateMap.is_chat_retracted ? 'open' : 'closed')
+			});
 			return false;
 		}
 
-			// Обработчик события onHashchange
-			// 
 	// Открытые методы
 			// Метод initModule
 		initModule = function ($container) {
@@ -183,6 +233,16 @@ spa.shell = (function (){
 			jqueryMap.$chat
 				.attr('title', configMap.chat_retract_title)
 				.click(onClickChat);
+
+			// настраиваем uriAnchor 
+			$.uriAnchor.configModule({
+				schema_map : configMap.uri_schema_map
+			});
+
+			// обрабатываем соытия изменения якоря 
+			$(window)
+				.bind('hashchange', onHashchange)
+				.trigger('hashchange');
 		};
 
 		return {initModule : initModule};
