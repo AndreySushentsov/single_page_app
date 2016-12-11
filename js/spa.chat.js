@@ -4,8 +4,8 @@ spa.chat = (function () {
 		configMap = {
 			main_html : String()
 				+'<div class="spa-chat">'
-				+	'<div class="spa-chat-head"'
-				+		'<div class="spa-chat-head-toggle">'+'</div>'
+				+	'<div class="spa-chat-head">'
+				+		'<div class="spa-chat-head-toggle">+</div>'
 				+		'<div class="spa-chat-head-title">'
 				+			'Chat'
 				+		'</div>'
@@ -52,7 +52,7 @@ spa.chat = (function () {
 			slider_opened_px :0
 		},
 		jqueryMap = {},
-		setJqueryMap, getEmSize, setPxSize, setSliderPosition, onClickToggle, configModule, initModule;
+		setJqueryMap, getEmSize, setPxSizes, setSliderPosition, onClickToggle, configModule, initModule;
 
 	// Служебные методы
 	getEmSize = function (elem) {
@@ -84,7 +84,7 @@ spa.chat = (function () {
 		var px_per_em, opened_height_em;
 		px_per_em = getEmSize( jqueryMap.$slider.get(0));
 
-		opened_height_em = configMap.slider_close_em;
+		opened_height_em = configMap.slider_open_em;
 
 		stateMap.px_per_em = px_per_em;
 		stateMap.slider_opened_px = opened_height_em * px_per_em;
@@ -227,9 +227,9 @@ spa.chat = (function () {
 	}
 
 	// вернуть открытые методы
-	return{
-		setSliderPosition : setSliderPosition,
-		configModule      : configModule,
-		initModule 	      : initModule
-	}
+	return {
+				setSliderPosition : setSliderPosition,
+				configModule      : configModule,
+				initModule 	      : initModule
+			};
 }());
