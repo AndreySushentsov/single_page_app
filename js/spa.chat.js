@@ -5,7 +5,7 @@ spa.chat = (function () {
 			main_html : String()
 				+'<div class="spa-chat">'
 				+	'<div class="spa-chat-head">'
-				+		'<div class="spa-chat-head-toggle">+</div>'
+				+		'<div class="spa-chat-head-toggle">-</div>'
 				+		'<div class="spa-chat-head-title">'
 				+			'Chat'
 				+		'</div>'
@@ -32,12 +32,14 @@ spa.chat = (function () {
 				set_chat_anchor:true
 			},
 
-			slider_open_time   :250,
-			slider_close_time  :250,
-			slider_open_em     :16,
-			slider_close_em    :2,
-			slider_open_title  :'Click to close',
-			slider_close_title :'Click to open',
+			slider_open_time     :250,
+			slider_close_time    :250,
+			slider_open_em       :18,
+			slider_close_em      :2,
+			slider_opened_min_em : 10,
+			window_height_min_em : 20,
+			slider_open_title    :'Click to close',
+			slider_close_title   :'Click to open',
 
 			chat_model     :null,
 			people_model   :null,
@@ -52,7 +54,9 @@ spa.chat = (function () {
 			slider_opened_px :0
 		},
 		jqueryMap = {},
-		setJqueryMap, getEmSize, setPxSizes, setSliderPosition, onClickToggle, configModule, initModule;
+		setJqueryMap, getEmSize, setPxSizes, setSliderPosition,
+		 onClickToggle, configModule, initModule,
+		 removeSlider, handleResize;
 
 	// Служебные методы
 	getEmSize = function (elem) {
@@ -81,10 +85,17 @@ spa.chat = (function () {
 	};
 		// Метод setPxSizes
 	setPxSizes = function () {
-		var px_per_em, opened_height_em;
-		px_per_em = getEmSize( jqueryMap.$slider.get(0));
+		var px_per_em, window_height_em, opened_height_em;
 
-		opened_height_em = configMap.slider_open_em;
+		px_per_em = getEmSize( jqueryMap.$slider.get(0));
+		window_height_em = Math.floor(
+			($(window).height() / px_per_em) + 0.5
+		);
+
+		opened_height_em = 
+			window_height_em > configMap.window_height_min_em
+			? configMap.slider_open_em
+			: configMap.slider_opened_min_em;
 
 		stateMap.px_per_em = px_per_em;
 		stateMap.slider_opened_px = opened_height_em * px_per_em;
@@ -92,6 +103,28 @@ spa.chat = (function () {
 		jqueryMap.$sizer.css({
 			height : (opened_height_em - 2) * px_per_em
 		});
+	};
+
+		// Метод handleResize
+		// Назначение : 
+		// 		В ответ на событие изменения размера окна корркетирует
+		//		представление, формеруемое данным модулем, если необходимо
+		// Действия :
+		// 		Если высота или ширина окна оказывается меньше заданного порога,
+		//		изменить размер выплывающего чата в соответствии с уменьшимся размером окна.
+		// Возвращает :
+		//		false - изменение размера не учтено
+		//		true - изменение размера учтено
+		// Исключения : нет
+	handleResize = function () {
+		// ничего не делать, если выплывающего контейнера нет
+		if (! jqueryMap.$slider) { return false}
+
+		setPxSizes();
+		if (stateMap.position_type === 'opened') {
+			jqueryMap.$slider.css({ height : stateMap.slider_opened_px });
+		}
+		return true;
 	};
 	// Обработчики событий
 
@@ -226,10 +259,37 @@ spa.chat = (function () {
 		return true;
 	}
 
+		// Метод removeSlider
+		// Назначение : 
+		//		удаляет из DOM элемент chatSlider
+		//		возвращает исходное состояние
+		//  	удаляет указатели на методы обратного вызова и другие данные
+		// Аргументы : нет
+		// Возвращает : true
+		// Исключения : нет
+	removeSlider = function () {
+		// откатить инициализацию и стереть состояние
+		// удалить из DOM контейнер; при этом удаляется и привязки событий
+		if (jqueryMap.$slider) {
+			jqueryMap.$slider.remove();
+			jqueryMap = {};
+		}
+		stateMap.$append_target = null;
+		stateMap.position_type = 'closed';
+
+		// стереть значения ключей
+		configMap.chat_model = null;
+		configMap.people_model = null;
+		configMap.set_chat_anchor = null;
+
+		return true;
+	};
 	// вернуть открытые методы
 	return {
 				setSliderPosition : setSliderPosition,
 				configModule      : configModule,
-				initModule 	      : initModule
+				initModule 	      : initModule,
+				removeSlider      : removeSlider,
+				handleResize        : handleResize
 			};
 }());

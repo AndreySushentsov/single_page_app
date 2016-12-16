@@ -5,6 +5,7 @@ spa.shell = (function (){
 			anchor_schema_map: {
 				chat:{ opened: true, closed: true}
 			},
+			resize_interval : 200,
 			main_html: String()
 				+ '<div class = "spa-shell-head">'
 				+ 	'<div class = "spa-shell-head-logo"></div>'
@@ -18,10 +19,14 @@ spa.shell = (function (){
 				+ '<div class = "spa-shell-foot"></div>'
 				+ '<div class = "spa-shell-modal"></div>' 
 		},
-		stateMap = { anchor_map: {} },
+		stateMap = { 
+			$container  : undefined,
+			anchor_map  : {},
+			resize_idto : undefined 
+		},
 		jqueryMap = {},
 
-		copyAnchorMap, setJqueryMap, changeAnchorPart, onHashchange, setChatAnchor, initModule;
+		copyAnchorMap, setJqueryMap, changeAnchorPart, onHashchange, onResize, setChatAnchor, initModule;
 
 	// Служебные методы
 			// Возвращает копию сохраненного хэша якорей
@@ -163,6 +168,19 @@ spa.shell = (function (){
 			});
 			return false;
 		}
+
+			// onResize
+		onResize = function () {
+			if (stateMap.resize_idto) { return true;}
+			spa.chat.handleResize();
+			stateMap.resize_idto = setTimeout(
+				function () {
+					stateMap.resize_idto = undefined;
+				}, 
+				configMap.resize_interval
+			);
+			return true;
+		};
 	// Обратные вызовы
 			// setChatAnchor
 			// Пример : setChatAnchor('closed');
@@ -223,6 +241,7 @@ spa.shell = (function (){
 
 			// обрабатываем соытия изменения якоря 
 			$(window)
+				.bind('resize', onResize)
 				.bind('hashchange', onHashchange)
 				.trigger('hashchange');
 		};

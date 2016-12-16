@@ -31,7 +31,7 @@
 	border-radius: 0.3em 0 0 0;
 }
 .spa-chat-colser{
-	right: 0;
+	right: 0px;
 	width: 2em;
 }
 .spa-chat-closer:hover{
@@ -49,7 +49,6 @@
 	position: absolute;
 	left: 0;
 	width: 16em;
-	margin-left: -8em;
 }
 .spa-chat-sizer{
 	position: absolute;
